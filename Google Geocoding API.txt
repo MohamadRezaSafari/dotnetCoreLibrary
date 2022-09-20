@@ -1,0 +1,10 @@
+//var address = string.Join(",", House Number, Street Direction, Street Name, Street Suffix, City, State, Zip, Country);
+var address = string.Join(",", "180");
+var address = string.Join(",", "Herengracht 180");
+var key = "AIzaSyB7NtHwzP_d_gsDbr6C5ku4tNZjiVTYUBk";
+//var postalCode = "1016 BR|country:NL";
+var postalCode = "9901AD|country:NL";
+
+
+var url = $"https://maps.googleapis.com/maps/api/geocode/json?address={address}&components=postal_code:{postalCode}&key={key}=&sensor=false";
+//var url = $"https://maps.google.com/maps/api/geocode/json?components=postal_code:{"9901AD"}&key={key}&sensor=false";
