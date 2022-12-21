@@ -10,6 +10,11 @@ namespace Providers
 {
     public static class RandCore
     {
+        public static string DateTimeTick()
+        {
+            return DateTime.Now.Ticks.ToString();
+        }
+
         public static string Mix()
         {
             int _number = Number();

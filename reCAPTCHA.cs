@@ -1,34 +1,68 @@
-﻿using System;
+﻿
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json.Linq;
 
 namespace dotNetCoreV2.Providers
 {
-    public class reCAPTCHA
+    public class reCAPTCHAAttribute : Attribute, IActionFilter
     {
-        public static bool ReCaptchaPassed(string gRecaptchaResponse, string secret, ILogger logger)
+        public void OnActionExecuting(ActionExecutingContext context)
         {
-            HttpClient httpClient = new HttpClient();
-            var res = httpClient.GetAsync($"https://www.google.com/recaptcha/api/siteverify?secret={secret}&response={gRecaptchaResponse}").Result;
-            if (res.StatusCode != HttpStatusCode.OK)
+            try
             {
-                logger.LogError("Error while sending request to ReCaptcha");
-                return false;
-            }
+                var validationResult = CheckReCaptchaResponseAsync(context.HttpContext.Request?.Form["g-recaptcha-response"]).Result;
 
-            string JSONres = res.Content.ReadAsStringAsync().Result;
-            dynamic JSONdata = JObject.Parse(JSONres);
-            if (JSONdata.success != "true")
+                if (validationResult == false)
+                {
+                    context.HttpContext.Response.StatusCode = 403;
+                }
+            }
+            catch (Exception e)
             {
-                return false;
+                context.Result = new ContentResult()
+                {
+                    Content = "Try again"
+                };
             }
+        }
 
-            return true;
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
+
+        }
+
+        private static async Task<bool> CheckReCaptchaResponseAsync(string rcResponse)
+        {
+            var secret = "6Ldrf8UUAAAAAAHm3kJ-Q_laqytBT149SA5rmKvR";
+
+            if (string.IsNullOrWhiteSpace(secret))
+                return true;
+            if (string.IsNullOrWhiteSpace(rcResponse))
+                throw new ApplicationException("reCaptcha response is missing.");
+
+            using (var client = new HttpClient())
+            {
+                var content = new FormUrlEncodedContent(
+                    new Dictionary<string, string>
+                    {
+                        { "secret", secret },
+                        { "response", rcResponse }
+                    });
+                var response = await client.PostAsync("https://www.google.com/recaptcha/api/siteverify", content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var jReponse = JObject.Parse(responseString);
+
+                if (!bool.TryParse((string)jReponse["success"], out bool success) || !success)
+                    return false;
+                return true;
+            }
         }
     }
 }

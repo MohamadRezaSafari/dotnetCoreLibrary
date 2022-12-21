@@ -5,12 +5,38 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Providers
 {
     public class EncryptionCore
     {
-        private readonly string EncryptionKey = @"1'QS[Y'?&D)*PK@6z+Myx-;K2/hA;f+1b0s;2zFcqG";
+        private readonly static string EncryptionKey = "v5RLRL5Czm0BDsP86vwT";
+        private static byte[] ByteKey;
+
+        private static byte[] Key
+        {
+            get => ByteKey;
+            set => ByteKey = Encoding.UTF8.GetBytes(EncryptionKey);
+        }
+
+
+        public static string ProtectedDataEncryption(string Text)
+        {
+            byte[] enc = ProtectedData.Protect(Encoding.UTF8.GetBytes(Text), Key, DataProtectionScope.LocalMachine);
+
+            return Convert.ToBase64String(enc);
+        }
+
+        // Encryption.ProtectedDataDecryption(x)
+        public static string ProtectedDataDecryption(string Encrypted)
+        {
+            byte[] ByteEncrypted = Convert.FromBase64String(Encrypted.Replace(' ', '+'));
+            byte[] dec = ProtectedData.Unprotect(ByteEncrypted, Key, DataProtectionScope.CurrentUser);
+
+            return Encoding.UTF8.GetString(dec);
+        }
 
 
         public string Encrypt(string clearText)

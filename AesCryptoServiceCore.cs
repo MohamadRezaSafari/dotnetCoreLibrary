@@ -59,7 +59,7 @@ namespace Providers
                 throw new ArgumentNullException("IV");
 
             string plaintext = null;
-            byte[] cipherText = Convert.FromBase64String(Text);
+            byte[] cipherText = Convert.FromBase64String(Text.Replace(' ', '+'));
 
             using (AesCryptoServiceProvider aesAlg = new AesCryptoServiceProvider())
             {

@@ -18,8 +18,7 @@ namespace Providers
             return routeContext.HttpContext.Request.IsAjaxRequest();
         }
     }
-
-
+    
     public static class HttpRequestExtensions
     {
         private const string RequestedWithHeader = "X-Requested-With";

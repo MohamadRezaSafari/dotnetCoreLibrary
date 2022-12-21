@@ -16,25 +16,25 @@ namespace Providers
 
         private static MemoryCache Cache { get; } = new MemoryCache(new MemoryCacheOptions());
 
-        public override void OnActionExecuting(ActionExecutingContext c)
-        {
-            var key = string.Concat(Name, "-", c.HttpContext.Request.HttpContext.Connection.RemoteIpAddress);
+        //public override void OnActionExecutingAsync(ActionExecutingContext c)
+        //{
+        //    var key = string.Concat(Name, "-", c.HttpContext.Request.HttpContext.Connection.RemoteIpAddress);
 
-            if (!Cache.TryGetValue(key, out bool entry))
-            {
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(Seconds));
+        //    if (!Cache.TryGetValue(key, out bool entry))
+        //    {
+        //        var cacheEntryOptions = new MemoryCacheEntryOptions()
+        //            .SetAbsoluteExpiration(TimeSpan.FromSeconds(Seconds));
 
-                Cache.Set(key, true, cacheEntryOptions);
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(Message))
-                    Message = "You may only perform this action every {n} seconds.";
+        //        Cache.Set(key, true, cacheEntryOptions);
+        //    }
+        //    else
+        //    {
+        //        if (string.IsNullOrEmpty(Message))
+        //            Message = "You may only perform this action every {n} seconds.";
 
-                c.Result = new ContentResult { Content = Message.Replace("{n}", Seconds.ToString()) };
-                c.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-            }
-        }
+        //        c.Result = new ContentResult { Content = Message.Replace("{n}", Seconds.ToString()) };
+        //        c.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
+        //    }
+        //}
     }
 }

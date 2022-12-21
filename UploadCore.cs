@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -14,6 +12,148 @@ namespace Providers
     {
         private readonly string[] ImageExtensions = new string[] { ".jpeg", ".jpg", ".png", ".gif" };
         private readonly string[] DocExtensions = new string[] { ".pdf", ".doc", ".docx", ".pptx", ".ppt" };
+        private readonly string[] ZipExtensions = new string[] { ".zip", ".rar" };
+        private readonly string[] VideoExtensions = new string[] { ".mp4", ".webm", ".ogg", ".gif" };
+        private string ImageName;
+        private string ImageName_thumb;
+        private string name;
+
+
+        // await _uploadCore.UploadImageAsync(_hostingEnvironment.WebRootPath, "upload", 10, pic);
+        public async Task<string> UploadImageAsync(dynamic path, string folder, int MaxSize, IFormFile file)
+        {
+            if (file != null && file.Length > 0 && ImageExtensions.Contains(Path.GetExtension(file.FileName).ToLower()) && file.ContentType.Contains("image"))
+            {
+                if (FileSizeCore.Mb(file.Length) > MaxSize)
+                    throw new Exception("Big File!");
+
+                try
+                {
+                    var savePath = path + $"{"/img/"}\\{folder}\\";
+                    ImageName = folder + "_" + RandCore.Mix() + Path.GetExtension(file.FileName);
+                    string _path = Path.Combine(savePath, Path.GetFileName(ImageName));
+                    using (var stream = File.Create(_path))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    return ImageName;
+                }
+                catch (Exception error)
+                {
+                    throw new Exception(error.Message);
+                }
+            }
+            return null;
+        }
+
+
+
+        public async Task<string> UploadImageAsync(dynamic path, int MaxSize, IFormFile file)
+        {
+            if (file != null && file.Length > 0 && ImageExtensions.Contains(Path.GetExtension(file.FileName).ToLower()) && file.ContentType.Contains("image"))
+            {
+                if (FileSizeCore.Mb(file.Length) > MaxSize)
+                    throw new Exception("Big File!");
+
+                try
+                {
+                    var savePath = path + $"{"/img/"}";
+                    ImageName = RandCore.Mix() + Path.GetExtension(file.FileName);
+                    string _path = Path.Combine(savePath, Path.GetFileName(ImageName));
+                    using (var stream = File.Create(_path))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    return ImageName;
+                }
+                catch (Exception error)
+                {
+                    throw new Exception(error.Message);
+                }
+            }
+            return null;
+        }
+
+
+
+
+        //public string UploadZipFile(string dir, int MaxSize, HttpPostedFileBase file)
+        //{
+        //    string fileName = String.Empty;
+
+        //    try
+        //    {
+        //        if (FileSizeCore.Mb(file.ContentLength) > MaxSize)
+        //            throw new Exception("Big File!");
+
+        //        if (file != null && file.ContentLength > 0 && ZipExtensions.Contains(Path.GetExtension(file.FileName).ToLower()))
+        //        {
+        //            fileName = RandCore.DateTimeTick() + Path.GetExtension(file.FileName);
+        //            string path = Path.Combine(HostingEnvironment.MapPath(dir), Path.GetFileName(fileName));
+        //            file.SaveAs(path);
+        //        }
+
+        //        return fileName;
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        throw new Exception(error.Message);
+        //    }
+        //}
+
+
+
+        //public string UploadFile(string dir, int MaxSize, HttpPostedFileBase file)
+        //{
+        //    string fileName = String.Empty;
+
+        //    try
+        //    {
+        //        if (FileSizeCore.Mb(file.ContentLength) > MaxSize)
+        //            throw new Exception("Big File!");
+
+        //        if (file != null && file.ContentLength > 0 && DocExtensions.Contains(Path.GetExtension(file.FileName).ToLower()) && file.ContentType.Contains("application"))
+        //        {
+        //            fileName = RandCore.DateTimeTick() + Path.GetExtension(file.FileName);
+        //            string path = Path.Combine(HostingEnvironment.MapPath(dir), Path.GetFileName(fileName));
+        //            file.SaveAs(path);
+        //        }
+
+        //        return fileName;
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        throw new Exception(error.Message);
+        //    }
+        //}
+
+
+
+
+        //public string UploadVideo(string dir, int MaxSize, HttpPostedFileBase file)
+        //{
+        //    string videoName = String.Empty;
+
+        //    try
+        //    {
+        //        if (FileSizeCore.Mb(file.ContentLength) > MaxSize)
+        //            throw new Exception("Big File!");
+
+        //        if (file != null && file.ContentLength > 0 && VideoExtensions.Contains(Path.GetExtension(file.FileName).ToLower()) && file.ContentType.Contains("video"))
+        //        {
+        //            videoName = RandCore.Mix() + Path.GetExtension(file.FileName);
+        //            string path = Path.Combine(HostingEnvironment.MapPath(dir), Path.GetFileName(videoName));
+        //            file.SaveAs(path);
+        //        }
+
+        //        return videoName;
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        throw new Exception(error.Message);
+        //    }
+        //}
+
 
 
         // string name = await _uploadCore.ImageApi(file, _hostingEnvironment.WebRootPath , Request.Form["extension"], 3);
@@ -45,7 +185,7 @@ namespace Providers
 
 
         // string name = await _uploadCore.ImageApi(file, _hostingEnvironment.WebRootPath , Request.Form["extension"], 3, 100, 100);
-        public async Task<string> ImageApi(IFormFile file, dynamic Path, string extension, int maxSize , int width, int height)
+        public async Task<string> ImageApi(IFormFile file, dynamic Path, string extension, int maxSize, int width, int height)
         {
             if (FileSizeCore.KB(file.Length) <= 0)
             {
